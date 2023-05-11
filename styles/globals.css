@@ -1,0 +1,91 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: IBMPlexSans, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+    Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    background: rgb(101,39,9);
+    background: linear-gradient(90deg, rgba(101,39,9,1) 0%, rgba(186,123,21,1) 30%, rgba(242,218,149,1) 100%);
+  color: var(--text-purple);
+}
+
+@font-face {
+  font-family: 'IBMPlexSans';
+  font-style: normal;
+  font-weight: 500;
+  src: url(/fonts/IBMPlexSans-Regular.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'IBMPlexSans';
+  font-style: normal;
+  font-weight: 600;
+  src: url(/fonts/IBMPlexSans-SemiBold.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'IBMPlexSans';
+  font-style: normal;
+  font-weight: 700;
+  src: url(/fonts/IBMPlexSans-Bold.ttf) format('truetype');
+}
+
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+p {
+  font-weight: 500;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+p,
+pre {
+  margin: 0;
+}
+
+button {
+  background-color: transparent;
+  background-image: none;
+  font-weight: 600;
+}
+
+button:focus {
+  outline: 1px dotted;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+/* glass-morphism */
+.glass {
+  transition: 0.3s;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.glass:hover {
+  background: hsla(0, 0%, 100%, 0.692);
+  border: 1px solid rgb(255, 255, 255);
+}
+
+:root {
+  --text-purple: rgba(5, 1, 70, 1);
+  --text-purple-dark: rgba(5, 1, 70, 1);
+  --text-black: rgba(17, 24, 39, 1);
+  --text-white-100: rgba(229, 231, 235, 1);
+}
