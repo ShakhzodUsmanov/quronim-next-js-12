@@ -2,26 +2,35 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
-import coffeeStoreData from "../../data/coffee-stores.json";
 import styles from "../../styles/coffee-store.module.css";
 import cls from "classnames";
+import { fetchCoffeeStores } from "lib/coffee-stores";
+import { useContext, useEffect, useState } from "react"; 
+import { StoreContext } from "context/store-context";
+import { isEmpty } from "utils";
+ 
+export async function getStaticProps(staticProps) {
+  const params = staticProps.params;
 
-export function getStaticProps(staticProps) {
-  const params = staticProps?.params?.id;
+  const coffeeStoreData = await fetchCoffeeStores();
+
+  const findCoffeeSotreById = coffeeStoreData.find((coffeeStore) => {
+    return coffeeStore.id.toString() === params.id; //synamic Id
+  });
+
   return {
     props: {
-      coffeeStore: coffeeStoreData.find((coffeeStore) => {
-        return coffeeStore.id.toString() === params; //synamic Id
-      }),
+      coffeeStore: findCoffeeSotreById ? findCoffeeSotreById : {},
     },
   };
 }
 
-export function getStaticPaths() {
+export async function getStaticPaths() {
+  const coffeeStoreData = await fetchCoffeeStores();
   const paths = coffeeStoreData.map((coffeeStore) => {
     return {
       params: {
-        id: coffeeStore.id.toString(),
+        id: coffeeStore.id?.toString(),
       },
     };
   });
@@ -31,19 +40,37 @@ export function getStaticPaths() {
   };
 }
 
-const CoffeeStore = (props) => {
+const CoffeeStore = (initialProps) => {
   const router = useRouter();
+  const { state: {coffeeStores} } = useContext(StoreContext);
+
+  const id = router.query.id;
+
+  const [coffeeStore, setCoffeeStore] = useState(initialProps.coffeeStore);
+
+  useEffect(() => {
+    if (!(initialProps.CoffeeStore)) {
+      if (coffeeStores.length > 0) {
+        const findCoffeeSotreById = coffeeStores.find((coffeeStore) => {
+          return coffeeStore.id.toString() === id;
+        });
+        setCoffeeStore(findCoffeeSotreById);
+      }
+    }
+  }, [id]);
 
   if (router.isFallback) {
     return <h1>Loading...</h1>;
   }
 
-  const { name, address, neighbourhood, imgUrl } = props.coffeeStore;
-
   const handleUpvoteButton = () => {
     console.log("Up vote!");
     return;
   };
+
+  
+  const { name, adress, neighborhood, imgUrl } = coffeeStore;
+  console.log(coffeeStore);
 
   return (
     <div className={styles.layout}>
@@ -54,14 +81,14 @@ const CoffeeStore = (props) => {
       <div className={styles.container}>
         <div className={styles.col1}>
           <div className={styles.backToHomeLink}>
-            <Link href="/">Back to Home</Link>
+            <Link href="/">← Back to Home</Link>
           </div>
           <div className={styles.nameWrapper}>
             <h1 className={styles.name}>{name}</h1>
           </div>
           <Image
             className={styles.storeImg}
-            src={imgUrl}
+            src={imgUrl || "/static/images/image-not-found.png"}
             width={600}
             height={360}
             alt="Coffee-store img"
@@ -76,17 +103,19 @@ const CoffeeStore = (props) => {
               height={24}
               alt="icon"
             />
-            <p className={styles.text}>{address}</p>
+            <p className={styles.text}>{adress}</p>
           </div>
-          <div className={styles.iconWrapper}>
-            <Image
-              src="/static/icons/nearMe.svg"
-              width={24}
-              height={24}
-              alt="icon"
-            />
-            <p className={styles.text}>{neighbourhood}</p>
-          </div>
+          {neighborhood && (
+            <div className={styles.iconWrapper}>
+              <Image
+                src="/static/icons/nearMe.svg"
+                width={24}
+                height={24}
+                alt="icon"
+              />
+              <p className={styles.text}>{neighborhood}</p>
+            </div>
+          )}
           <div className={styles.iconWrapper}>
             <Image
               src="/static/icons/star.svg"

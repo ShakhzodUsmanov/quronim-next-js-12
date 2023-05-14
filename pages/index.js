@@ -1,25 +1,58 @@
 import Head from "next/head";
-import Image from "next/image";
-
 import styles from "../styles/Home.module.css";
 
 import Banner from "@/components/banner";
 import Card from "@/components/card";
-
-import coffeeStoresData from "../data/coffee-stores.json";
+import { fetchCoffeeStores } from "lib/coffee-stores";
+import useTrackLocation from "hooks/use-track-location";
+import { useContext, useEffect, useState } from "react";
+import { ACTION_TYPES, StoreContext } from "../context/store-context";
 
 export async function getStaticProps() {
+  const coffeeStores = await fetchCoffeeStores();
   return {
     props: {
-      coffeeStores: coffeeStoresData,
+      coffeeStores: coffeeStores,
     },
   };
 }
 
 export default function Home(props) {
-  const handleOnClick = () => {
-    console.log("clicked");
+  const { handleTrackLocation, locationErrorMsg, isFindingLocation } =
+    useTrackLocation();
+
+  const [coffeeStoresNearByError, setCoffeeStoresNearByError] = useState(null);
+  const { dispatch, state } = useContext(StoreContext);
+  console.log(state);
+  const latLong = state.latLong;
+  const { coffeeStores: coffeeStoresNearBy } = state;
+
+  useEffect(() => {
+    fetchinDataNearStores(latLong);
+  }, [latLong]);
+
+  async function fetchinDataNearStores(latLong) {
+    if (latLong) {
+      try {
+        const fetchedCoffeeStores = await fetchCoffeeStores(latLong, 30);
+        dispatch({
+          type: ACTION_TYPES.SET_COFFEE_STORES,
+          payload: { coffeeStores: fetchedCoffeeStores },
+        });
+      } catch (error) {
+        console.log(error.message);
+        setCoffeeStoresNearByError(error.message);
+      }
+    }
+  }
+
+  const handleOnBannerBtnClick = () => {
+    handleTrackLocation();
   };
+
+  locationErrorMsg ? alert(locationErrorMsg) : null;
+  coffeeStoresNearByError ? alert(coffeeStoresNearByError) : null;
+
   return (
     <div className={styles.container}>
       <Head>
@@ -28,20 +61,42 @@ export default function Home(props) {
       </Head>
 
       <main className={styles.main}>
-        <Banner buttonText="View stores nearby" handleOnClick={handleOnClick} />
-        {props.coffeeStores.length > 0 && (
+        <Banner
+          isLoading={isFindingLocation}
+          buttonText={isFindingLocation ? "Loading..." : "View stores nearby"}
+          handleOnClick={handleOnBannerBtnClick}
+        />
+        {coffeeStoresNearBy?.length > 0 && (
           <>
-            <h2 className={styles.heading2}>Toronto coffee stores</h2>
+            <h2 className={styles.heading2}>Stores near you</h2>
             <div className={styles.cardLayout}>
-              {props.coffeeStores.map((coffeeStore) => {
-                const { name, imgUrl, id, websiteUrl } = coffeeStore;
+              {coffeeStoresNearBy?.map((coffeeStore) => {
+                const { name, imgUrl, id } = coffeeStore;
                 return (
                   <Card
                     key={id}
                     name={name}
-                    imgUrl={imgUrl}
+                    imgUrl={imgUrl || "/static/images/image-not-found.png"}
                     href={`/coffee-store/${id}`}
-                    websiteUrl={websiteUrl}
+                    className={styles.card}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
+        {props.coffeeStores.length > 0 && (
+          <>
+            <h2 className={styles.heading2}>Tashken t coffee stores</h2>
+            <div className={styles.cardLayout}>
+              {props.coffeeStores.map((coffeeStore) => {
+                const { name, imgUrl, id } = coffeeStore;
+                return (
+                  <Card
+                    key={id}
+                    name={name}
+                    imgUrl={imgUrl || "/static/images/image-not-found.png"}
+                    href={`/coffee-store/${id}`}
                     className={styles.card}
                   />
                 );
