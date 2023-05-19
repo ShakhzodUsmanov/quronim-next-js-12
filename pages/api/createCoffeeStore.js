@@ -1,7 +1,7 @@
 import {
   table,
-  getMinifiedRecords,
   findRecordByFilter,
+  getMinifiedRecords,
 } from "../../lib/airtable";
 
 const createCoffeeStore = async (req, res) => {
